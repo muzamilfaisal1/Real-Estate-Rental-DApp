@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Havenly</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1><a href="index.html"><i class="fas fa-building"></i> Havenly</a></h1>
+    <div>
+      <button id="connectWalletBtn"><i class="fas fa-wallet"></i> Connect Wallet</button>
+      <p id="walletAddress" class="wallet-address">Wallet: Not connected</p>
+      <p id="connectionStatus" class="status pending">Not Connected</p>
+    </div>
+  </header>
+
+  <nav>
+    <button onclick="showTab('lease')" id="leaseBtn" class="active"><i class="fas fa-file-contract"></i> Lease</button>
+    <button onclick="showTab('payment')" id="paymentBtn"><i class="fas fa-money-bill-wave"></i> Payment</button>
+    <button onclick="showTab('dispute')" id="disputeBtn"><i class="fas fa-gavel"></i> Disputes</button>
+    <button onclick="showTab('maintenance')" id="maintenanceBtn"><i class="fas fa-tools"></i> Maintenance</button>
+    <button onclick="showTab('ownership')" id="ownershipBtn"><i class="fas fa-home"></i> Ownership</button>
+    <button onclick="showTab('admin')" id="adminBtn"><i class="fas fa-user-shield"></i> Admin</button>
+  </nav>
+
+  <main>
+    <!-- Lease Section -->
+    <section id="lease" class="tab active">
+      <h2><i class="fas fa-file-contract"></i> Lease Agreements</h2>
+      <div class="card">
+        <h3>Create New Lease</h3>
+        <form id="createLeaseForm">
+          <div class="form-group">
+            <label for="propertyId">Property ID</label>
+            <input type="text" id="propertyId" placeholder="Enter property ID" required>
+          </div>
+          <div class="form-group">
+            <label for="tenantAddress">Tenant Ethereum Address</label>
+            <input type="text" id="tenantAddress" placeholder="0x..." required>
+          </div>
+          <div class="form-group">
+            <label for="leaseStart">Lease Start Date</label>
+            <input type="date" id="leaseStart" required>
+          </div>
+          <div class="form-group">
+            <label for="leaseDuration">Duration (months)</label>
+            <input type="number" id="leaseDuration" min="1" max="60" required>
+          </div>
+          <div class="form-group">
+            <label for="monthlyRent">Monthly Rent (ETH)</label>
+            <input type="number" id="monthlyRent" step="0.01" min="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="securityDeposit">Security Deposit (ETH)</label>
+            <input type="number" id="securityDeposit" step="0.01" min="0.01" required>
+          </div>
+          <button type="submit" class="success">Create Lease</button>
+        </form>
+      </div>
+      
+      <div class="card">
+        <h3>My Active Leases</h3>
+        <div id="activeLeases">
+          <p class="empty-state">Connect your wallet to view your active leases</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment Section -->
+    <section id="payment" class="tab">
+      <h2><i class="fas fa-money-bill-wave"></i> Rent Payments</h2>
+      <div class="card">
+        <h3>Make Payment</h3>
+        <form id="makePaymentForm">
+          <div class="form-group">
+            <label for="paymentLeaseId">Lease ID</label>
+            <input type="text" id="paymentLeaseId" placeholder="Enter lease ID" required>
+          </div>
+          <div class="form-group">
+            <label for="paymentAmount">Amount (ETH)</label>
+            <input type="number" id="paymentAmount" step="0.01" min="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="paymentPeriod">Payment Period</label>
+            <input type="month" id="paymentPeriod" required>
+          </div>
+          <button type="submit" class="success">Send Payment</button>
+        </form>
+      </div>
+      
+      <div class="card">
+        <h3>Payment History</h3>
+        <div id="paymentHistory">
+          <p class="empty-state">Connect your wallet to view your payment history</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dispute Section -->
+    <section id="dispute" class="tab">
+      <h2><i class="fas fa-gavel"></i> Dispute Resolution</h2>
+      <div class="card">
+        <h3>File a Dispute</h3>
+        <form id="fileDisputeForm">
+          <div class="form-group">
+            <label for="disputeLeaseId">Lease ID</label>
+            <input type="text" id="disputeLeaseId" placeholder="Enter lease ID" required>
+          </div>
+          <div class="form-group">
+            <label for="disputeType">Dispute Type</label>
+            <select id="disputeType" required>
+              <option value="">Select type</option>
+              <option value="payment">Payment Issue</option>
+              <option value="property">Property Condition</option>
+              <option value="terms">Lease Terms Violation</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="disputeDescription">Description</label>
+            <textarea id="disputeDescription" rows="4" placeholder="Describe the issue in detail" required></textarea>
+          </div>
+          <button type="submit">Submit Dispute</button>
+        </form>
+      </div>
+      
+      <div class="card">
+        <h3>My Disputes</h3>
+        <div id="myDisputes">
+          <p class="empty-state">Connect your wallet to view your disputes</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Maintenance Section -->
+    <section id="maintenance" class="tab">
+      <h2><i class="fas fa-tools"></i> Maintenance Requests</h2>
+      <div class="card">
+        <h3>Submit Maintenance Request</h3>
+        <form id="maintenanceRequestForm">
+          <div class="form-group">
+            <label for="maintenanceLeaseId">Lease ID</label>
+            <input type="text" id="maintenanceLeaseId" placeholder="Enter lease ID" required>
+          </div>
+          <div class="form-group">
+            <label for="maintenanceType">Request Type</label>
+            <select id="maintenanceType" required>
+              <option value="">Select type</option>
+              <option value="plumbing">Plumbing</option>
+              <option value="electrical">Electrical</option>
+              <option value="appliance">Appliance</option>
+              <option value="structural">Structural</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="maintenanceUrgency">Urgency Level</label>
+            <select id="maintenanceUrgency" required>
+              <option value="low">Low - Not Urgent</option>
+              <option value="medium">Medium - Needs Attention</option>
+              <option value="high">High - Urgent</option>
+              <option value="emergency">Emergency - Immediate Action Required</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="maintenanceDescription">Description</label>
+            <textarea id="maintenanceDescription" rows="4" placeholder="Describe the issue in detail" required></textarea>
+          </div>
+          <button type="submit">Submit Request</button>
+        </form>
+      </div>
+      
+      <div class="card">
+        <h3>My Maintenance Requests</h3>
+        <div id="myMaintenanceRequests">
+          <p class="empty-state">Connect your wallet to view your maintenance requests</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ownership Section -->
+    <section id="ownership" class="tab">
+      <h2><i class="fas fa-home"></i> Property Ownership</h2>
+      <div class="card">
+        <h3>Register New Property</h3>
+        <form id="registerPropertyForm">
+          <div class="form-group">
+            <label for="propertyAddress">Physical Address</label>
+            <input type="text" id="propertyAddress" placeholder="123 Main St, City, State, ZIP" required>
+          </div>
+          <div class="form-group">
+            <label for="propertyType">Property Type</label>
+            <select id="propertyType" required>
+              <option value="">Select type</option>
+              <option value="apartment">Apartment</option>
+              <option value="house">House</option>
+              <option value="condo">Condo</option>
+              <option value="townhouse">Townhouse</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="propertySize">Size (sq ft)</label>
+            <input type="number" id="propertySize" min="1" required>
+          </div>
+          <div class="form-group">
+            <label for="propertyBedrooms">Number of Bedrooms</label>
+            <input type="number" id="propertyBedrooms" min="0" max="10" required>
+          </div>
+          <div class="form-group">
+            <label for="propertyBathrooms">Number of Bathrooms</label>
+            <input type="number" id="propertyBathrooms" min="0" max="10" step="0.5" required>
+          </div>
+          <button type="submit" class="success">Register Property</button>
+        </form>
+      </div>
+      
+      <div class="card">
+        <h3>My Properties</h3>
+        <div id="myProperties">
+          <p class="empty-state">Connect your wallet to view your properties</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Section -->
+    <section id="admin" class="tab">
+      <h2><i class="fas fa-user-shield"></i> Admin Dashboard</h2>
+      <div class="card">
+        <h3>Platform Statistics</h3>
+        <div id="adminStats" class="admin-stats">
+          <div class="stat-item">
+            <i class="fas fa-file-contract"></i>
+            <span class="stat-value" id="totalLeases">-</span>
+            <span class="stat-label">Total Leases</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-home"></i>
+            <span class="stat-value" id="totalProperties">-</span>
+            <span class="stat-label">Properties</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-users"></i>
+            <span class="stat-value" id="totalUsers">-</span>
+            <span class="stat-label">Users</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-money-bill-wave"></i>
+            <span class="stat-value" id="totalVolume">-</span>
+            <span class="stat-label">Volume (ETH)</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3>Pending Approvals</h3>
+        <div id="pendingApprovals">
+          <p class="empty-state">Connect your admin wallet to view pending approvals</p>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3>System Settings</h3>
+        <form id="adminSettingsForm">
+          <div class="form-group">
+            <label for="platformFee">Platform Fee (%)</label>
+            <input type="number" id="platformFee" min="0" max="10" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="disputeTimeout">Dispute Resolution Timeout (days)</label>
+            <input type="number" id="disputeTimeout" min="1" max="30" required>
+          </div>
+          <button type="submit">Update Settings</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div id="errorMessage" class="error-message"></div>
+  <div id="successMessage" class="success-message"></div>
+  
+  <!-- Modal for displaying details -->
+  <div id="detailsModal" class="modal">
+    <!-- Modal content will be dynamically inserted here -->
+  </div>
+
+  <footer>
+    <p>© 2025 Havenly. All rights reserved. | <a href="privacy.html" id="privacyLink">Privacy Policy</a> | <a href="terms.html" id="termsLink">Terms of Service</a></p>
+    <p><i class="fas fa-shield-alt"></i> Secured by Blockchain Technology</p>
+  </footer>
+
+  <!-- Added timestamp to prevent caching -->
+  <script src="app.js"></script>
+</body>
+</html>
